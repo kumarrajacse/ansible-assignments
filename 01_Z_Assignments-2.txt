@@ -1,0 +1,80 @@
+Learning Objectives:-
+Install Ansible on the control node.
+Configure the `ansible` user on the control node for ssh shared key access to managed nodes. Do not use a passphrase for the key pair.
+Create a simple Ansible inventory on the control node in `/home/ansible/inventory` containing `node1` and `node2`.
+Configure sudo access for Ansible on `node1` and `node2` such that Ansible may use sudo for any command with no password prompt.
+Verify each managed node is able to be accessed by Ansible from the control node using the `ping` module. Redirect the output of a successful command to `/home/ansible/output`.
+
+
+Additional Information:-
+Your CIO has greenlit a proof of concept for Ansible in your environment. You are to set up an Ansible control node in a test environment and verify basic functionality. You have three demo hosts, one to be the control node (control1), and two to serve as managed nodes (node1 and node2). You must complete the following steps:
+
+1. Install Ansible on the control node.
+
+$ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
+$ sudo apt update
+$ sudo apt install ansible
+
+
+2. Configure the ansible user on the control node for ssh shared key access to managed nodes.
+	Note: do not use a passphrase for the key pair.
+adduser ansible
+usermod -aG sudo ansible
+
+visudo
+ # in the file opened
+ ansible  ALL=(ALL:ALL) NOPASSWD:ALL
+
+# To test this
+su ansible
+sudo apt-get update
+# It should not ask for password and it should complete the command execution
+
+3. Create a simple Ansible inventory on the control node in /home/ansible/inventory containing node1 and node2.
+
+ans:-
+
+ansible@ip-172-31-8-76:~$ cat inventory
+[node1]
+172.31.5.89
+
+4. Configure sudo access for Ansible on node1 and node2 so that Ansible may use sudo for any command with no password prompt.
+
+usermod -aG sudo ansible
+
+5. Verify each managed node can be accessed by Ansible from the control node using the ping module. Redirect the output of a successful command to /home/ansible/output.
+
+ans:-
+
+ansible@ip-172-31-8-76:~$ ansible all -i /home/ansible/inventory -m ping
+[DEPRECATION WARNING]: Distribution Ubuntu 18.04 on host 172.31.5.89 should use /usr/bin/python3, but is using /usr/bin/python for backward compatibility with prior
+Ansible releases. A future Ansible release will default to using the discovered platform python for this host. See
+https://docs.ansible.com/ansible/2.9/reference_appendices/interpreter_discovery.html for more information. This feature will be removed in version 2.12. Deprecation
+warnings can be disabled by setting deprecation_warnings=False in ansible.cfg.
+172.31.5.89 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+
+ ansible all -i /home/ansible/inventory -m ping  >/home/ansible/output.cfg
+[DEPRECATION WARNING]: Distribution Ubuntu 18.04 on host 172.31.5.89 should use /usr/bin/python3, but is using /usr/bin/python for backward compatibility with prior
+Ansible releases. A future Ansible release will default to using the discovered platform python for this host. See
+https://docs.ansible.com/ansible/2.9/reference_appendices/interpreter_discovery.html for more information. This feature will be removed in version 2.12. Deprecation
+warnings can be disabled by setting deprecation_warnings=False in ansible.cfg.
+
+ansible@ip-172-31-8-76:~$ cat output.cfg q
+172.31.5.89 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+
+Important Notes:
+You might have to create user "ansible" on all servers.
+The ansible user has the same password as the cloud_user.
+/etc/hosts entries must be present on control1 for the managed nodes.

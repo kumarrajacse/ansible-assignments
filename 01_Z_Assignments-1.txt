@@ -1,0 +1,80 @@
+Learning Objectives:-
+Install Ansible on the control host.
+Create an `ansible` user on both the control host and workstation host being sure to set a password you can remember.
+Configure a pre-shared key for Ansible that allows the user to log in from `control` to `workstation` without a password.
+Configure the Ansible user on the workstation host so that Ansible may sudo without a password.
+Create a simple inventory in `/home/ansible/inventory` consisting of only the `workstation` host.
+Write an Ansible playbook in `/home/ansible/git-setup.yml` on the control node that installs `git` on `workstation` then execute the playbook.
+
+
+Additional Information:-
+You have been tasked with putting together a presentation to demonstrate how Ansible may be used to install software on remote hosts automatically. Before the demo, you will need to configure your test systems. You have been provided two hosts called control and workstation(Please create 2 Unix/Linux machine for the same). You will need to configure the ansible user on workstation to have sudo access without a password to the automated software installed via Ansible. You must also configure the control host as your Ansible control server by installing Ansible on it as well as configuring the Ansible user with a pre-shared key to login to the workstation host as the ansible user.
+
+Once the basic configuration is complete, you will need to create a simple inventory in /home/ansible/inventory on the control server containing the workstation host. Afterward, you will write a simple playbook in /home/ansbile/git-setup.yml on the control host that installs git on the workstation host. You will need to make sure the playbook works by running it from the control server.
+
+
+Summary tasks list:-
+
+Install Ansible on the control host.
+
+ans:-
+$ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
+$ sudo apt update
+$ sudo apt install ansible
+
+Create an ansible user on both the control host and workstation host.
+
+ans:-
+adduser ansible
+
+Configure a pre-shared key for Ansible that allows the user to log in from control to workstation without a password.
+
+ans:-
+ssh ansible@<acspublicip>
+ssh-keygen
+ssh-copy-id ansible@<node1privateip>
+
+Configure the Ansible user on the workstation host so that Ansible may sudo without a password.
+
+
+
+Create a simple inventory in /home/ansible/inventory consisting of only the workstation host.
+
+ansible@ip-172-31-8-76:~$ cat inventory
+172.31.5.89
+
+
+Write and execute an Ansible playbook in /home/ansible/git-setup.yml on the control node that installs git on the workstation host.
+
+ans:-
+
+---             sudo apt-get install git
+- hosts: all
+  become: yes
+  tasks:
+    - name: install-git
+      apt:
+        name: git
+        update_cache: yes
+
+ansible-playbook -i inventory git-setup.yml
+
+
+PLAY [all] *****************************************************************************************************************************************************************
+
+TASK [Gathering Facts] *****************************************************************************************************************************************************
+[DEPRECATION WARNING]: Distribution Ubuntu 18.04 on host 172.31.5.89 should use /usr/bin/python3, but is using /usr/bin/python for backward compatibility with prior
+Ansible releases. A future Ansible release will default to using the discovered platform python for this host. See
+https://docs.ansible.com/ansible/2.9/reference_appendices/interpreter_discovery.html for more information. This feature will be removed in version 2.12. Deprecation
+warnings can be disabled by setting deprecation_warnings=False in ansible.cfg.
+ok: [172.31.5.89]
+
+TASK [install-git] *********************************************************************************************************************************************************
+[WARNING]: Updating cache and auto-installing missing dependency: python-apt
+ok: [172.31.5.89]
+
+PLAY RECAP *****************************************************************************************************************************************************************
+172.31.5.89                : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+
+
